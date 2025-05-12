@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { CameraIcon, ImagesIcon, RefreshCwIcon, PlayIcon } from '@lucide/svelte';
+  import { CameraIcon, ImagesIcon, RefreshCwIcon, SaveAllIcon, PlayIcon } from '@lucide/svelte';
 
-  import { captureImage } from '$lib/capturer';
+  import { captureImage, downloadAllImages } from '$lib/capturer';
 
   import { config } from '$stores/config';
   import { captured } from '$stores/captured-images';
-  import { activeIndex } from '$stores/target-points';
+  import { activeIndex, targets } from '$stores/target-points';
 
   import Button from '$ui/button/button.svelte';
 
@@ -31,6 +31,11 @@
   function handleReset() {
     $captured = [];
     $config.start = false;
+  }
+
+  function handleSave() {
+    console.log($captured.length);
+    downloadAllImages();
   }
 </script>
 
@@ -63,13 +68,26 @@
         {/if}
       </div>
 
-      <Button size="icon" class="rounded-full size-20" onclick={toggleCapture}>
-        {#if $config.start}
-          <CameraIcon class="!size-6" />
-        {:else}
-          <PlayIcon class="!size-6" />
+      <div class="relative size-20">
+        {#if $config.start && $captured.length === $targets.length}
+          <div class="absolute -right-16 top-1/2 -translate-y-1/2">
+            <Button
+              size="icon"
+              variant="secondary"
+              onclick={handleSave}
+              class="rounded-full text-base size-12 bg-blue-500 hover:bg-blue-600">
+              <SaveAllIcon class="!size-5" />
+            </Button>
+          </div>
         {/if}
-      </Button>
+        <Button size="icon" class="rounded-full size-full" onclick={toggleCapture}>
+          {#if $config.start}
+            <CameraIcon class="!size-6" />
+          {:else}
+            <PlayIcon class="!size-6" />
+          {/if}
+        </Button>
+      </div>
 
       <div class="grid place-content-center size-20">
         {#if $config.start}
