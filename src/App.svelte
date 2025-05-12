@@ -5,7 +5,7 @@
   import ActionOverlay from '$components/ActionOverlay';
   import PinpointOverlay from '$components/PinpointOverlay';
 
-  import { commonStore as common } from '$stores/common';
+  import { config, aligned } from '$stores/config';
 
   let videoElement = $state<HTMLVideoElement>();
 </script>
@@ -17,17 +17,11 @@
     <ActionOverlay {videoElement} />
   {/if}
 
-  {#if $common.crosshair}
+  {#if $config.crosshair}
     <div
       class={clsx(
-        $common.aligned ? 'bg-green-800' : 'bg-white',
-        'absolute top-0 w-px h-full left-1/2 -translate-x-1/2 shadow-sm'
-      )}>
-    </div>
-    <div
-      class={clsx(
-        $common.aligned ? 'bg-green-800' : 'bg-white',
-        'absolute left-0 w-full h-px top-1/2 -translate-y-1/2 shadow-sm'
+        $aligned ? 'ring-green-800' : 'ring-white',
+        'absolute size-6 top-1/2 left-1/2 -translate-1/2 ring-4 rounded-full'
       )}>
     </div>
   {/if}

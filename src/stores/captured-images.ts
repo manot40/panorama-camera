@@ -9,4 +9,4 @@ export type CapturedImage = {
   targetPosition: Vector3;
 };
 
-export const capturedStore = writable<CapturedImage[]>([]);
+export const captured = writable<CapturedImage[]>([]);

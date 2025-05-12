@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 
 import { SphereGeometry, MeshBasicMaterial, Mesh, Vector3 } from 'three';
 
-import { indexStore, targetStore, type TargetPoint } from '$stores/target-points';
+import { activeIndex, targets, type TargetPoint } from '$stores/target-points';
 
 export function generateTargetPoints() {
   const points = <TargetPoint[]>[];
@@ -33,7 +33,7 @@ export function generateTargetPoints() {
   const bottomPoint = createPointMaterial(...botXYZ);
   points.push({ mesh: bottomPoint, position: new Vector3(...botXYZ), captured: false });
 
-  targetStore.set(points);
+  targets.set(points);
   highlightCurrentTarget();
   return points;
 }
@@ -47,8 +47,8 @@ export function createPointMaterial(x: number, y: number, z: number) {
 }
 
 export function highlightCurrentTarget() {
-  const index = get(indexStore);
-  const targetPoints = get(targetStore);
+  const index = get(activeIndex);
+  const targetPoints = get(targets);
   // Reset semua warna
   targetPoints.forEach((point) => {
     if (!point.captured) {
@@ -66,10 +66,10 @@ export function highlightCurrentTarget() {
 
 // Temukan target berikutnya yang belum diambil
 export function findNextUncapturedTarget() {
-  const targetPoints = get(targetStore);
+  const targetPoints = get(targets);
   for (let i = 0; i < targetPoints.length; i++) {
     if (!targetPoints[i].captured) {
-      indexStore.set(i);
+      activeIndex.set(i);
       highlightCurrentTarget();
       return;
     }

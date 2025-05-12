@@ -1,12 +1,12 @@
 import { get } from 'svelte/store';
 
-import { targetStore } from '$stores/target-points';
-import { capturedStore } from '$stores/captured-images';
+import { targets } from '$stores/target-points';
+import { captured as store } from '$stores/captured-images';
 import { orientationStore } from '$stores/camera-orientation';
 
 export function captureImage(index: number, cameraView: HTMLVideoElement) {
-  const captured = get(capturedStore);
-  const targetPoints = get(targetStore);
+  const captured = get(store);
+  const targetPoints = get(targets);
   const currentOrientation = get(orientationStore);
 
   if (index >= targetPoints.length) return;
@@ -36,7 +36,7 @@ export function captureImage(index: number, cameraView: HTMLVideoElement) {
 
 // Download semua gambar yang diambil
 export function downloadAllImages() {
-  const captured = get(capturedStore);
+  const captured = get(store);
 
   captured.forEach((image, index) => {
     const link = document.createElement('a');

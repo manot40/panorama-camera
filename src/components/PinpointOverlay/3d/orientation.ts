@@ -2,31 +2,30 @@ import { get } from 'svelte/store';
 
 import { findNextUncapturedTarget } from './target';
 
-import { commonStore } from '$stores/common';
+import { aligned } from '$stores/config';
 import { orientationStore } from '$stores/camera-orientation';
-import { indexStore, targetStore } from '$stores/target-points';
+import { activeIndex, targets } from '$stores/target-points';
 
 import { Euler, PerspectiveCamera, Quaternion, Vector3 } from 'three';
 
 export async function setupOrientationSensor(camera: PerspectiveCamera) {
-  const isAbsoluteSupported =
-    'AbsoluteOrientationSensor' in window &&
+  const isSupported =
+    'RelativeOrientationSensor' in window &&
     (await Promise.all([
-      navigator.permissions.query({ name: <any>'accelerometer' }),
-      navigator.permissions.query({ name: <any>'magnetometer' }),
       navigator.permissions.query({ name: <any>'gyroscope' }),
+      navigator.permissions.query({ name: <any>'accelerometer' }),
     ]).then((results) => results.every((r) => r.state === 'granted')));
 
-  if (isAbsoluteSupported) {
-    absoluteOrientationSensor(camera);
+  if (isSupported) {
+    relativeOrientationSensor(camera);
   } else {
     setupDeviceOrientation(camera);
   }
 }
 
-function absoluteOrientationSensor(camera: PerspectiveCamera) {
+function relativeOrientationSensor(camera: PerspectiveCamera) {
   try {
-    const sensor = new window.AbsoluteOrientationSensor({ frequency: 60 });
+    const sensor = new window.RelativeOrientationSensor({ frequency: 30, referenceName: 'device' });
     sensor.addEventListener('reading', () => {
       // Convert quaternion ke euler angles
       const quaternion = new Quaternion(
@@ -76,8 +75,8 @@ function updateCameraOrientation(camera: PerspectiveCamera, [beta, gamma, alpha]
 
 // Periksa apakah kamera mengarah ke target saat ini
 function checkTargetAlignment(camera: PerspectiveCamera) {
-  const index = get(indexStore);
-  const targetPoints = get(targetStore);
+  const index = get(activeIndex);
+  const targetPoints = get(targets);
 
   if (index >= targetPoints.length) return;
 
@@ -99,13 +98,33 @@ function checkTargetAlignment(camera: PerspectiveCamera) {
   const alignment = cameraDirection.dot(targetDirection);
 
   // Jika alignment di atas threshold, aktifkan tombol capture
-  const THRESHOLD = 0.95; // cos(18 derajat) ≈ 0.95 -> target berada dalam ~18 derajat dari pusat
+  const THRESHOLD = 0.999; // cos(18 derajat) ≈ 0.95 -> target berada dalam ~18 derajat dari pusat
 
-  commonStore.set({ ...get(commonStore), aligned: alignment > THRESHOLD });
+  aligned.set(alignment > THRESHOLD);
 }
+
+interface Sensor {
+  new (opts?: SensorOptions): SensorInstance;
+}
+interface SensorInstance {
+  stop(): void;
+  start(): void;
+  timestamp: number;
+  quaternion: [number, number, number, number];
+
+  addEventListener: SensorListener<'reading' | 'error'>;
+  removeEventListener: SensorListener<'reading' | 'error'>;
+}
+
+type SensorOptions = {
+  frequency?: number;
+  referenceName?: 'device';
+};
+type SensorListener<T extends 'reading' | 'error'> = (name: T, callback: (data: any) => void) => void;
 
 declare global {
   interface Window {
-    AbsoluteOrientationSensor: any;
+    AbsoluteOrientationSensor: Sensor;
+    RelativeOrientationSensor: Sensor;
   }
 }

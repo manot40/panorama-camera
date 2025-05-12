@@ -8,5 +8,6 @@ export type TargetPoint = {
   captured: boolean;
 };
 
-export const indexStore = writable(0);
-export const targetStore = writable(<TargetPoint[]>[]);
+export const activeIndex = writable(0);
+
+export const targets = writable<TargetPoint[]>([]);

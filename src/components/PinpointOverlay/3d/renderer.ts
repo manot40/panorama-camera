@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 
-import { threeConfigStore } from '$stores/common';
+import { threeConfig } from '$stores/config';
 
 import { Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, SphereGeometry, WebGLRenderer } from 'three';
 
@@ -11,7 +11,7 @@ export function setupRenderer(overlay: HTMLCanvasElement) {
   const scene = new Scene();
   const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-  const options = get(threeConfigStore);
+  const options = get(threeConfig);
   const renderer = new WebGLRenderer({ canvas: overlay, alpha: true });
 
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -29,5 +29,14 @@ export function setupRenderer(overlay: HTMLCanvasElement) {
   // Posisikan kamera di tengah sphere
   camera.position.set(0, 0, 0);
 
-  return { camera, renderer, scene, sphere };
+  function cleanup() {
+    renderer.setAnimationLoop(null);
+    renderer.clear();
+    renderer.dispose();
+    scene.remove(sphere);
+    sphere.geometry.dispose();
+    sphere.material.dispose();
+  }
+
+  return { camera, renderer, scene, sphere, cleanup };
 }
