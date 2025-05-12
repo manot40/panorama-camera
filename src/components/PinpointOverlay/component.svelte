@@ -21,7 +21,7 @@
     let cleanupFn: (() => void) | undefined = undefined;
 
     (async () => {
-      const threeInstance = await setupRenderer(overlay);
+      const threeInstance = setupRenderer(overlay);
 
       scene = threeInstance.scene;
       camera = threeInstance.camera;
@@ -41,7 +41,7 @@
       function animate() {
         requestAnimationFrame(animate);
         if (!renderer || !scene || !camera) return;
-        'renderAsync' in renderer ? renderer.renderAsync(scene, camera) : renderer.render(scene, camera);
+        renderer.render(scene, camera);
       }
     })();
 

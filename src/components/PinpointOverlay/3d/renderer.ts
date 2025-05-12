@@ -4,7 +4,7 @@ import { threeConfigStore } from '$stores/common';
 
 import { Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, SphereGeometry, WebGLRenderer } from 'three';
 
-export async function setupRenderer(overlay: HTMLCanvasElement) {
+export function setupRenderer(overlay: HTMLCanvasElement) {
   overlay.width = window.innerWidth;
   overlay.height = window.innerHeight;
 
@@ -12,14 +12,7 @@ export async function setupRenderer(overlay: HTMLCanvasElement) {
   const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   const options = get(threeConfigStore);
-  const renderer = await (async () => {
-    if (navigator.gpu) {
-      const { WebGPURenderer } = await import('three/webgpu');
-      return new WebGPURenderer({ canvas: overlay, alpha: true });
-    } else {
-      return new WebGLRenderer({ canvas: overlay, alpha: true });
-    }
-  })();
+  const renderer = new WebGLRenderer({ canvas: overlay, alpha: true });
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 

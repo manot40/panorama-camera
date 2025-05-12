@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 
 import { resolve } from 'node:path';
-import { readFileSync } from 'node:fs';
 
 import tailwindcss from '@tailwindcss/vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
@@ -17,4 +16,18 @@ export default defineConfig({
       $components: resolve(import.meta.dirname, 'src/components'),
     },
   },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          console.log(id);
+          const separate = separateChunks.find((m) => id.includes(m));
+          if (separate) return separate;
+        },
+      },
+    },
+  },
 });
+
+const separateChunks = ['three.module', 'three.core'];
