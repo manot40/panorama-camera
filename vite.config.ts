@@ -1,22 +1,22 @@
 import { defineConfig } from 'vite';
 
 import { resolve } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import tailwindcss from '@tailwindcss/vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+
+const keyPath = resolve(import.meta.dirname, 'cert.key');
+const certPath = resolve(import.meta.dirname, 'cert.crt');
+
+const host = '0.0.0.0';
+const isSSL = existsSync(keyPath) && existsSync(certPath);
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
 
-  server: {
-    host: '0.0.0.0',
-    https: {
-      key: readFileSync('D:\\WebService\\cert\\crt\\localhost.key'),
-      cert: readFileSync('D:\\WebService\\cert\\crt\\localhost.crt'),
-    },
-  },
+  server: isSSL ? { host, https: { key: readFileSync(keyPath), cert: readFileSync(certPath) } } : undefined,
 
   resolve: {
     alias: {
@@ -32,7 +32,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          console.log(id);
           const separate = separateChunks.find((m) => id.includes(m));
           if (separate) return separate;
         },

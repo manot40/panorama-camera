@@ -36,6 +36,7 @@
   };
 </script>
 
+<!-- svelte-ignore a11y_media_has_caption -->
 <video use:cameraStream autoplay playsinline></video>
 
 {@render children?.(stream)}
